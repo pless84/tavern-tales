@@ -1,0 +1,25 @@
+# Ren'Py build/runtime output
+*.rpyc
+*.rpymc
+*.rpyb
+game/cache/
+game/saves/
+log.txt
+errors.txt
+traceback.txt
+__pycache__/
+
+# Personal data: chats and your own character cards
+chats/
+characters/*
+!characters/Mira.png
+!characters/Mira/
+!characters/Rook.png
+!characters/Rook.json
+
+# Test output
+tests/
+
+# Local agent notes
+.omc/
+.remember/

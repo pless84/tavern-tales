@@ -1,0 +1,5 @@
+{"user_name":"User","character_name":"Mira","create_date":"2024-05-01@18h30m12s","chat_metadata":{"note_prompt":"","note_interval":1,"note_position":1,"note_depth":4}}
+{"name":"Mira","is_user":false,"is_system":false,"send_date":"May 1, 2024 6:30pm","mes":"*Mira glances up and grins.* Well, look what the storm dragged in.","extra":{},"swipe_id":0,"swipes":["*Mira glances up and grins.* Well, look what the storm dragged in.","*The tavern is empty except for Mira.* Closing time was an hour ago."],"swipe_info":[]}
+{"name":"User","is_user":true,"is_system":false,"send_date":"May 1, 2024 6:31pm","mes":"Hi Mira! An ale, please.","extra":{}}
+{"name":"SillyTavern System","is_user":false,"is_system":true,"send_date":"May 1, 2024 6:31pm","mes":"Note: this is a system message.","extra":{"type":"narrator"}}
+{"name":"Mira","is_user":false,"is_system":false,"send_date":"May 1, 2024 6:32pm","mes":"Coming right up! *She slides a mug over.*","gen_started":"2024-05-01T16:31:58.000Z","gen_finished":"2024-05-01T16:32:03.000Z","extra":{"api":"openai","model":"gpt-4o"},"swipe_id":1,"swipes":["Sure thing.","Coming right up! *She slides a mug over.*"],"swipe_info":[{},{}]}
