@@ -62,7 +62,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.endswith("/models"):
-            return self._json(200, {"object": "list", "data": [{"id": "mock-model"}]})
+            return self._json(200, {"object": "list", "data": [{"id": "mock-model"}, {"id": "tiny-model:7b"}]})
         if self.path == "/_log":
             with lock:
                 return self._json(200, state["log"])

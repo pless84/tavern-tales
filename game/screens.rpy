@@ -295,17 +295,20 @@ screen ai_settings_screen(status=""):
             hbox:
                 spacing 12
                 text lbl style "tt_label" xsize 140 yalign 0.5
+                $ field_w = 760 if fld == "model" else 900
                 button:
-                    xsize 900
+                    xsize field_w
                     background Frame(Solid("#2e2550" if editing != fld else "#0d0a18"), 4, 4)
                     padding (12, 8)
                     action SetScreenVariable("editing", fld)
                     if editing == fld:
-                        input value FieldInputValue(persistent, fld) color "#ffffff" pixel_width 870 multiline (fld == "persona")
+                        input value FieldInputValue(persistent, fld) color "#ffffff" pixel_width (field_w - 30) multiline (fld == "persona")
                     else:
                         $ v = getattr(persistent, fld) or ""
                         $ v_short = (v[:110] + "…") if len(v) > 110 else v
-                        text (("•" * min(len(v), 24)) if (secret and v) else escape_renpy(v_short.replace("\n", " ") or ("(empty — click to edit)" if fld != "persona" else "(optional — describe yourself; Shift+Enter for a new line)"))) color ("#ffffff" if v else "#ffffff66")
+                        text (("•" * min(len(v), 24)) if (secret and v) else escape_renpy(v_short.replace("\n", " ") or {"persona": "(optional — describe yourself; Shift+Enter for a new line)", "model": "(empty — uses the first model the server lists)"}.get(fld, "(empty — click to edit)"))) color ("#ffffff" if v else "#ffffff66")
+                if fld == "model":
+                    textbutton "Choose…" id "choose_model" action [SetScreenVariable("editing", None), Return("models")] selected False yalign 0.5
 
         hbox:
             spacing 12
@@ -348,6 +351,42 @@ screen ai_settings_screen(status=""):
             text escape_renpy(warn) size 18 color "#ff9a9a"
         if status:
             text escape_renpy(status) size 18 color ACCENT
+
+screen model_picker():
+    modal True
+    zorder 70
+    style_prefix "tt"
+    key "K_ESCAPE" action Return(None)
+    key "game_menu" action Return(None)
+    add Solid("#0d0a18f2")
+    $ state, models, err = model_list_state()
+    if state == "loading":
+        timer 0.2 repeat True action Function(renpy.restart_interaction)
+    vbox:
+        xalign 0.5 ypos 30
+        spacing 12
+        xsize 900
+        hbox:
+            spacing 20
+            text "Choose a model" style "tt_title" size 34
+            textbutton "Cancel" id "cancel_models" action Return(None) yalign 0.5
+        if state == "loading":
+            text "Asking %s for its models…" % escape_renpy(persistent.api_base) style "tt_label"
+        elif state == "error":
+            text "Couldn't list models: %s" % escape_renpy(err) size 18 color "#ff9a9a"
+        elif not models:
+            text "The server didn't list any models. Close this and type the name instead." style "tt_label"
+        else:
+            text "%d available at %s" % (len(models), escape_renpy(persistent.api_base)) style "tt_label"
+            viewport:
+                ysize 560
+                mousewheel True
+                scrollbars "vertical"
+                vbox:
+                    spacing 4
+                    xsize 870
+                    for m in models:
+                        textbutton escape_renpy(m) id ("model_" + m) action Return(m) selected (persistent.model == m) xfill True
 
 ## Preferences ------------------------------------------------------------
 

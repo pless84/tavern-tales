@@ -176,6 +176,47 @@ def _describe(e):
     return msg
 
 
+def parse_models(data):
+    """Model ids from an OpenAI-style /models reply, in server order."""
+    entries = data.get("data", []) if isinstance(data, dict) else []
+    return [m["id"] for m in entries if isinstance(m, dict) and isinstance(m.get("id"), str) and m["id"]]
+
+
+class ModelList(object):
+    """Fetches /models on a background thread. Check .done, then .ids or .error."""
+
+    def __init__(self, url, headers=None, timeout=15):
+        self.url = url
+        self.headers = dict(headers or {})
+        self.timeout = timeout
+        self.ids = []
+        self.error = None
+        self.done = False
+        t = threading.Thread(target=self._run, name="ModelList")
+        t.daemon = True
+        t.start()
+
+    def _run(self):
+        import urllib.request
+        try:
+            req = urllib.request.Request(self.url, headers=self.headers)
+            with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                self.ids = parse_models(json.loads(r.read(4 * 1024 * 1024).decode("utf-8")))
+        except Exception as e:
+            self.error = _describe(e)
+        finally:
+            self.done = True
+
+
+MODELS = None           # the latest ModelList, if any
+
+
+def list_models(url, headers=None, timeout=15):
+    global MODELS
+    MODELS = ModelList(url, headers, timeout)
+    return MODELS
+
+
 def start(url, payload, headers=None, timeout=600):
     """Cancel any running stream and start a new one."""
     global CURRENT

@@ -183,6 +183,21 @@ testsuite global:
         screenshot "settings_1.png"
         click "Done" until not screen "ai_settings_screen" timeout 10.0
 
+    testcase model_picker:
+        description "Choose… lists the server's models and sets the picked one."
+        $ persistent.model = ""
+        run Jump("tt_begin")
+        pause until screen "card_picker" timeout 10.0
+        click "AI Settings" until screen "ai_settings_screen" timeout 10.0
+        click id "choose_model" until screen "model_picker" timeout 10.0
+        pause 0.3
+        screenshot "models_1.png"
+        assert screen "model_picker"
+        click id "model_tiny-model:7b" until not screen "model_picker" timeout 10.0
+        assert eval (persistent.model == "tiny-model:7b")
+        click "Done" until not screen "ai_settings_screen" timeout 10.0
+        $ persistent.model = ""
+
     testcase evil_card_name:
         description "A card name with [expr] and {tags} is shown literally and never evaluated."
         $ tt_test.evil = tt_test.write_evil_card()

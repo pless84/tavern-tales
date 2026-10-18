@@ -498,12 +498,25 @@ init -10 python:
         persistent.context_tokens = max(1024, min(32768, n))
         return "Context size set to %d tokens." % persistent.context_tokens
 
+    def start_model_list():
+        """Begin fetching the model list in the background (see the model_picker screen)."""
+        llmstream.list_models(_url("/models"), _headers())
+
+    def model_list_state():
+        """("loading" | "error" | "ready", ids, error message)."""
+        job = llmstream.MODELS
+        if job is None or not job.done:
+            return "loading", [], None
+        if job.error:
+            return "error", [], job.error
+        return "ready", job.ids, None
+
     def test_connection():
         try:
             data = renpy.fetch(_url("/models"), headers=_headers(), timeout=15, result="json")
-            ids = [m.get("id", "?") for m in data.get("data", [])]
-            if ids and not persistent.model:
-                persistent.model = ids[0]
-            return "Connected. Models: " + (", ".join(ids[:6]) or "(none listed)")
         except Exception as e:
             return "Failed: %s" % e
+        ids = llmstream.parse_models(data)
+        if ids and not persistent.model:
+            persistent.model = ids[0]
+        return "Connected. Models: " + (", ".join(ids[:6]) or "(none listed)")

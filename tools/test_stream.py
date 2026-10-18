@@ -124,6 +124,22 @@ def test_get_by_id():
     wait_done(s)
 
 
+def test_model_list():
+    job = llmstream.list_models(BASE + "/v1/models")
+    assert llmstream.MODELS is job
+    end = time.time() + 5
+    while not job.done and time.time() < end:
+        time.sleep(0.02)
+    assert job.error is None and job.ids == ["mock-model", "tiny-model:7b"], (job.error, job.ids)
+    bad = llmstream.list_models("http://127.0.0.1:1/v1/models")
+    end = time.time() + 5
+    while not bad.done and time.time() < end:
+        time.sleep(0.02)
+    assert bad.error and "refused" in bad.error.lower() and bad.ids == [], bad.error
+    assert llmstream.parse_models({"data": [{"id": "a"}, {"id": 5}, "x", {}]}) == ["a"]
+    assert llmstream.parse_models([1, 2]) == []
+
+
 if __name__ == "__main__":
     mock = subprocess.Popen([sys.executable, os.path.join(ROOT, "tools", "mock_llm.py"), str(PORT)],
                             stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

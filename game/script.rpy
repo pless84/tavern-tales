@@ -171,6 +171,13 @@ label ai_settings:
             $ settings_status = "Testing…"
             $ settings_status = test_connection()
             jump .loop
+        if r == "models":
+            $ start_model_list()
+            $ picked = renpy.call_screen("model_picker")
+            if isinstance(picked, basestring) and picked:
+                $ persistent.model = picked
+                $ settings_status = "Model set to %s." % picked
+            jump .loop
         if r == "detect":
             $ settings_status = detect_context()
             jump .loop
