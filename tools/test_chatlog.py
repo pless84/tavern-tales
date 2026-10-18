@@ -32,6 +32,13 @@ def test_round_trip():
     chatlog.write_chat(path, hist, "Sam", "Mira")
     assert chatlog.read_chat(path)[1] == hist
     assert chatlog.list_chats(os.path.dirname(path)) == [path]
+    # A new chat started in the same second never reuses an existing file.
+    p2 = chatlog.new_chat_path(os.path.dirname(path), "Mira")
+    if os.path.basename(p2).startswith("Mira - " + chatlog.stamp()):
+        assert p2 != path and not os.path.exists(p2), p2
+    open(p2, "w").close()
+    p3 = chatlog.new_chat_path(os.path.dirname(path), "Mira")
+    assert p3 not in (path, p2) and not os.path.exists(p3), p3
 
 
 def test_sillytavern_fixture():

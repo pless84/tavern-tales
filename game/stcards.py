@@ -35,9 +35,12 @@ class CardError(Exception):
 def _inflate(buf, budget):
     """Inflate at most min(MAX_TEXT_BYTES, budget[0]) bytes; budget is a per-file running total."""
     limit = min(MAX_TEXT_BYTES, budget[0])
+    if limit <= 0:
+        # zlib treats max_length=0 as "unlimited", so never pass it.
+        raise CardError("compressed text too large")
     d = zlib.decompressobj()
     out = d.decompress(buf, limit)
-    if d.unconsumed_tail:
+    if d.unconsumed_tail or (len(out) >= limit and not d.eof):
         raise CardError("compressed text too large")
     budget[0] -= len(out)
     return out

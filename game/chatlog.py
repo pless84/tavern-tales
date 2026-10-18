@@ -31,7 +31,11 @@ def chat_folder(base, card):
 
 def new_chat_path(folder, char_name):
     safe = "".join(ch for ch in char_name if ch not in '\\/:*?"<>|') or "chat"
-    return os.path.join(folder, "%s - %s.jsonl" % (safe, stamp()))
+    base = os.path.join(folder, "%s - %s" % (safe, stamp()))
+    path, n = base + ".jsonl", 2
+    while os.path.exists(path):     # same-second branch: never reuse an existing file
+        path, n = "%s (%d).jsonl" % (base, n), n + 1
+    return path
 
 
 def list_chats(folder):

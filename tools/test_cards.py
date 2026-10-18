@@ -82,6 +82,22 @@ def main():
         raise AssertionError("bomb should be refused")
     except stcards.CardError:
         pass
+    # A used-up budget must refuse, not inflate unlimited (zlib max_length=0 means no limit).
+    budget = [5]
+    assert stcards._inflate(zlib.compress(b"12345"), budget) == b"12345" and budget[0] == 0
+    for buf in (zlib.compress(b"A" * 1000), zlib.compress(b"")):
+        try:
+            stcards._inflate(buf, budget)
+            raise AssertionError("exhausted budget should refuse")
+        except stcards.CardError:
+            pass
+    # Boundary: output that exactly fits is fine, one byte over is refused.
+    assert stcards._inflate(zlib.compress(b"A" * 100), [100]) == b"A" * 100
+    try:
+        stcards._inflate(zlib.compress(b"A" * 100), [99])
+        raise AssertionError("over-limit stream should refuse")
+    except stcards.CardError:
+        pass
     # Unwanted compressed chunks are never inflated.
     open(os.path.join(d, "other.png"), "wb").write(png_with([(b"zTXt", b"comment\0\0" + bomb), (b"tEXt", b"chara\0" + b64(v2).encode())]))
     assert stcards.load_card(os.path.join(d, "other.png"))["name"] == "Old"
